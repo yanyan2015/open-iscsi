@@ -77,7 +77,7 @@ def run_cmd(cmd, output_save_file=None):
         dprint(cmd_str)
     pid = os.fork()
     if pid < 0:
-        print("Error: cannot fork!", flie=sys.stderr)
+        print("Error: cannot fork!", file=sys.stderr)
         sys.exit(1)
     if pid == 0:
         # the child
@@ -190,12 +190,11 @@ def user_spec_to_list(user_spec):
     """
     We have 16 subtests. By default, we run them all, but if
     the user has specified a subset, like 'N' or 'N-M', then
-    a list of the indicies they requested.
+    we build a list of the indices they requested.
 
     XXX: expand to handle groups, e.g. 1,3-4,12 ???
 
-    XXX: should we validate that the range will work, or just
-    let an exception happen in that case?
+    Returns True on a valid spec and False otherwise.
     """
     pat_single = re.compile(r'(\d+)$')
     pat_range = re.compile(r'(\d+)-(\d+)$')
@@ -204,7 +203,7 @@ def user_spec_to_list(user_spec):
     end_idx = None
     res = pat_range.match(user_spec)
     if res:
-        # user wants just one subtest
+        # user wants a subtest range
         start_idx = int(res.group(1)) - 1
         end_idx = int(res.group(2))
         dprint("Found request for range: %d-%d" % (start_idx, end_idx))
@@ -219,6 +218,13 @@ def user_spec_to_list(user_spec):
     if not found:
         print('Error: subtest spec does not match N or N-M: %s' % user_spec)
     else:
+        if start_idx < 0 or end_idx < 1 or start_idx >= end_idx:
+            print('Error: invalid subtest range: %s' % user_spec)
+            return False
+        if end_idx > len(Global.subtest_list):
+            print('Error: subtest range %s exceeds max test index %d' %
+                  (user_spec, len(Global.subtest_list)))
+            return False
         dprint("subtest_list before:", Global.subtest_list)
         Global.subtest_list = Global.subtest_list[start_idx:end_idx]
         dprint("subtest_list after:", Global.subtest_list)

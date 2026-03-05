@@ -80,7 +80,7 @@ class TestRegression(unittest.TestCase):
     def setUpClass(cls):
         util.verify_needed_commands_exist(['parted', 'fio', Global.MKFSCMD[0], 'bonnie++', 'sgdisk', 'iscsiadm'])
         util.vprint('*** Starting %s' % cls.__name__)
-        # an array of first burts, max burst, and max recv values, for testing
+        # an array of first burst, max burst, and max recv values, for testing
         cls.param_values = [[4096, 4096, 4096],
                             [8192, 4096, 4096],
                             [16384, 4096, 4096],
